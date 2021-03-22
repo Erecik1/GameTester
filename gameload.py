@@ -1,14 +1,25 @@
 from win32gui import GetWindowText, GetForegroundWindow
 import time
-import ifmain
-import getdata
+import psutil
 
-def main():
-    game_name = "League of Legends (TM) Client"
-    while GetWindowText(GetForegroundWindow()) != game_name:
-        print("Waiting for game!")
-        time.sleep(1)
-    else:
-        gamedata.get_frame()
+class Game(game_name,game_procces):
+    def __init__(self,game_name,game_procces):
+        self.game_name = game_name
+        self.game_procces = game_procces
+        self.is_game_procces_active = False
+        while self.is_game_procces_active == False:
+            for process in psutil.process_iter():
+                if self.game_procces == process.name():
+                    self.is_game_procces_active = True
+                    break
+            time.sleep(1)
 
-ifmain.main()
+    #check is game active window if not check procces list
+    def is_game_active_window(self):
+        if GetWindowText(GetForegroundWindow()) == self.game_name:
+            return True
+        else:
+            for process in psutil.process_iter():
+                if self.game_procces == process.name():
+                    return False
+            self.is_game_procces_active = False
