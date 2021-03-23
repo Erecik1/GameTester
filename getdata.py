@@ -10,8 +10,8 @@ import gameload
 class DataCollector:
 
     def __init__(self):
-        self.keyboard_events_array = np.array([],dtype='string')
-        self.mouse_events_array = np.array([],dtype='string')
+        self.keyboard_events_array = []
+        self.mouse_events_array = []
         self.start_time = time.time()
         self.interval = 0.1
         self.mouse = Controller()
@@ -20,16 +20,32 @@ class DataCollector:
         return str(time.time() - self.start_time)
 
     def keyboard_press(self,key):
-        item = np.array([current_time(),key,self.mouse.position],dtype='string')
-        self.keyboard_events_array = np.append(keyboard_events_array,item)
+        self.is_game_over()
+        item = (self.current_time(),key,self.mouse.position)
+        self.keyboard_events_array.append(item)
     
-    def mouse_press(self,x,y,button):
-        item = np.array([current_time(),button,x,y],dtype='string')
-        self.mouse_events_array = np.append(keyboard_events_array,item)
+    def mouse_press(self,x,y,button, pressed):
+        self.is_game_over()
+        item = (self.current_time(),button,(x,y))
+        self.mouse_events_array.append(item)
+
+
+    def is_game_over(self):
+        game.is_game_still_in_proggress()
+        if game.is_game_procces_active == False:
+            self.save()
 
     def save(self):
+        global keyboard_listener
+        global mouse_listener
+        keyboard_listener.stop()
+        mouse_listener.stop()
+
+        print("Files saved")
         print(self.keyboard_events_array)
         print(self.mouse_events_array)
+        #np.savetxt('kbfile.csv', [self.keyboard_events_array], delimiter=':', fmt='%s')
+        #np.savetxt('msfile.csv', [self.mouse_events_array], delimiter=':', fmt='%s')
 
 #keyboard
 def on_press(key):
@@ -45,13 +61,16 @@ def on_move(x, y):
 def on_click(x, y, button, pressed):
     if pressed:
         data.mouse_press(x,y,button,pressed)
+    else:
+        pass
 
 def on_scroll(x, y, dx, dy):
     pass
 
 
 
-game = gameload.Game("League of Legends (TM) Client","League of Legends.exe")
+#game = gameload.Game("League of Legends (TM) Client","League of Legends.exe")
+game = gameload.Game("League of Legends","LeagueClient.exe")
 data = DataCollector()
 
 
