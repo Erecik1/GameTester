@@ -2,7 +2,7 @@ from win32gui import GetWindowText, GetForegroundWindow
 import time
 import psutil
 
-class Game(game_name,game_procces):
+class Game:
     def __init__(self,game_name,game_procces):
         self.game_name = game_name
         self.game_procces = game_procces
@@ -15,7 +15,7 @@ class Game(game_name,game_procces):
             time.sleep(1)
 
     #check is game active window if not check procces list
-    def is_game_active_window(self):
+    def is_game_still_in_proggress(self):
         if GetWindowText(GetForegroundWindow()) == self.game_name:
             return True
         else:
