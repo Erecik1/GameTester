@@ -7,10 +7,12 @@ class Game:
         self.game_name = game_name
         self.game_procces = game_procces
         self.is_game_procces_active = False
+        print("Started")
         while self.is_game_procces_active == False:
             for process in psutil.process_iter():
                 if self.game_procces == process.name():
                     self.is_game_procces_active = True
+                    print("Proces matched")
                     break
             time.sleep(1)
 
