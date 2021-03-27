@@ -5,6 +5,7 @@ from pynput.mouse import Button, Controller
 import time
 import pandas as ps
 import datetime
+import convertdata
 
 class DataCollector(MouseListener,KeyboardListener):
 
@@ -33,7 +34,7 @@ class DataCollector(MouseListener,KeyboardListener):
     def current_time(self):
         clock = time.time() - self.start_time
         clock = round(clock, 3)
-        return str(clock)
+        return clock
 
     def current_day(self):
         dt_date = datetime.datetime.now()
@@ -41,12 +42,13 @@ class DataCollector(MouseListener,KeyboardListener):
 
     def keyboard_press(self,key):
         self.is_game_over()
-        item = [self.current_time(),key,self.mouse.position]
+        print(type(self.current_time()),type(key),type(self.mouse.position))
+        item = [self.current_time(),str(key),self.mouse.position]
         self.keyboard_events_array.append(item)
     
     def mouse_press(self,x,y,button, pressed):
         self.is_game_over()
-        item = [self.current_time(),button,(x,y)]
+        item = [self.current_time(),str(button)[7::],(x,y)]
         self.mouse_events_array.append(item)
 
 
@@ -57,12 +59,9 @@ class DataCollector(MouseListener,KeyboardListener):
             self.listener_on(False)
 
     def save(self):
-        np.savetxt(f"keyboard_{self.current_day()}.csv", 
-                self.keyboard_events_array,
-                delimiter =", ", 
-                fmt ='% s')
-        np.savetxt(f"mouse_{self.current_day()}.csv", 
-                self.mouse_events_array,
+        events = self.keyboard_events_array + self.mouse_events_array
+        np.savetxt(f"events_{self.current_day()}.csv", 
+                events,
                 delimiter =", ", 
                 fmt ='% s')
 
