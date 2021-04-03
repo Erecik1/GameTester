@@ -1,20 +1,19 @@
-import numpy as np
 from pynput.mouse import Listener as MouseListener
 from pynput.keyboard import Listener as KeyboardListener
 from pynput.mouse import Button, Controller
 import time
-import pandas as ps
 import datetime
 import convertdata
+import numpy as np
 
 class DataCollector(MouseListener,KeyboardListener):
 
     def __init__(self,game_object):
         self.game_object = game_object
-        self.keyboard_events_array = []
-        self.mouse_events_array = []
+        self.events_list_array = []
         self.start_time = time.time()
         self.interval = 0.1
+        self.mouse_count = 0
         self.mouse = Controller()
         self.keyboard_listener = KeyboardListener(on_press=self.on_press, on_release=self.on_release)
         self.mouse_listener = MouseListener(on_move=self.on_move, on_click=self.on_click, on_scroll=self.on_scroll)
@@ -28,50 +27,49 @@ class DataCollector(MouseListener,KeyboardListener):
             self.keyboard_listener.join()
             self.mouse_listener.join()
         elif statment == False:
+            print("here")
             self.keyboard_listener.stop()
             self.mouse_listener.stop()
 
-    def current_time(self):
+    def _current_time(self):
         clock = time.time() - self.start_time
         clock = round(clock, 3)
         return clock
 
-    def current_day(self):
+    def _current_day(self):
         dt_date = datetime.datetime.now()
         return dt_date.strftime("%d_%m_%Y")
 
-    def keyboard_press(self,key):
-        self.is_game_over()
-        print(type(self.current_time()),type(key),type(self.mouse.position))
-        item = [self.current_time(),str(key),self.mouse.position]
-        self.keyboard_events_array.append(item)
+    def _keyboard_press(self,key):
+        item = [self._current_time(),str(key),self.mouse.position]
+        self.events_list_array.append(item)
     
-    def mouse_press(self,x,y,button, pressed):
-        self.is_game_over()
-        item = [self.current_time(),str(button)[7::],(x,y)]
-        self.mouse_events_array.append(item)
+    def _mouse_press(self,x,y,button, pressed):
+        self.mouse_count += 1
+        if self.mouse_count % 5 == 0:
+            self._is_game_over()
+            self.mouse_count = 0
+        item = [self._current_time(),str(button),(x,y)]
+        self.events_list_array.append(item)
 
 
-    def is_game_over(self):
+
+    def _is_game_over(self):
         self.game_object.is_game_still_in_proggress()
         if self.game_object.is_game_procces_active == False:
-            self.save()
             self.listener_on(False)
 
     def save(self):
-        events = self.keyboard_events_array + self.mouse_events_array
-        np.savetxt(f"events_{self.current_day()}.csv", 
-                events,
-                delimiter =", ", 
-                fmt ='% s')
+        #check data
+        if len(self.events_list_array) == 0:
+            raise Exception("No data recorded")
 
-        self.keyboard_events_array = []
-        self.mouse_events_array = []
         print("Files saved")
+        return self.events_list_array, self.start_time()
 
-#keyboard
+    #keyboard
     def on_press(self,key):
-        self.keyboard_press(key)
+        self._keyboard_press(key)
 
     def on_release(self,key):
         pass
@@ -82,7 +80,7 @@ class DataCollector(MouseListener,KeyboardListener):
 
     def on_click(self,x, y, button, pressed):
         if pressed:
-            self.mouse_press(x,y,button,pressed)
+            self._mouse_press(x,y,button,pressed)
         else:
             pass
 
