@@ -1,3 +1,6 @@
 # created by virtualenv automatically
-/gameanalist
+/gametester
 /__pycache__
+/.vscode
+login_data.json
+events.csv
