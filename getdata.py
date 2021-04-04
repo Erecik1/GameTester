@@ -27,7 +27,6 @@ class DataCollector(MouseListener,KeyboardListener):
             self.keyboard_listener.join()
             self.mouse_listener.join()
         elif statment == False:
-            print("here")
             self.keyboard_listener.stop()
             self.mouse_listener.stop()
 
@@ -64,8 +63,8 @@ class DataCollector(MouseListener,KeyboardListener):
         if len(self.events_list_array) == 0:
             raise Exception("No data recorded")
 
-        print("Files saved")
-        return self.events_list_array, self.start_time()
+        print(self.events_list_array)
+        return self.events_list_array, self.start_time
 
     #keyboard
     def on_press(self,key):
