@@ -7,6 +7,8 @@ class ConvertData:
     def __init__(self, event_list):
         self.event_list = event_list
         self.champion_played = ""
+        #time in secs
+        self.game_duration = 0
         with open('login_data.json') as f:
             data = json.load(f)
         self.summoner_name = data['summoner_name']
@@ -23,7 +25,9 @@ class ConvertData:
         self.summoner_id = self._get_summoner_id()
         self.last_match_id = self._get_last_match_id(self.summoner_id)
         self.match_data = self._get_match_data_by_id(self.last_match_id)
-        self.match_results = 
+    
+
+
     def _one_day_ago_in_epoch(self):
         now = time.time()
         #days before now
@@ -37,6 +41,9 @@ class ConvertData:
         SUMMONER_ID_URL = f"/lol/summoner/v4/summoners/by-name/{self.summoner_name}"
         url = self.API_URL + SUMMONER_ID_URL
         r = requests.get(url, headers=self.headers)
+        #validate
+        if r.status_code != 200:
+            raise Exception("ApiKey or summonersName error")
         output = r.json()['accountId']
         return output
 
@@ -65,9 +72,29 @@ class ConvertData:
             if player['player']['accountId'] == self.summoner_id:
                 in_game_id = player['participantId']
                 break
-
+        self.game_duration = output['gameDuration']
         output = output['participants'][int(in_game_id)-1]
+
         return output
 
+    def dump_data(self):
+        game_data = self.match_data
+        win = False if game_data['stats']['win'] == 'false' else True
+        #think about it
+        cs_per_min_at_10 = game_data['timeline']['creepsPerMinDeltas']['0-10']
+        cs_diff_at_10 = game_data['timeline']['csDiffPerMinDeltas']['0-10']
+        xp_per_min_at_10 = game_data['timeline']['xpPerMinDeltas']['0-10']
+        xp_diff_at_10 = game_data['timeline']['xpDiffPerMinDeltas']['0-10']
+        gold_per_min_at_10 = game_data['timeline']['goldPerMinDeltas']['0-10']
+    
+        stats_dict = {
+            'cs_per_min_at_10' : cs_per_min_at_10,
+            'cs_diff_at_10': cs_diff_at_10,
+            'xp_per_min_at_10': xp_per_min_at_10,
+            'xp_diff_at_10': xp_diff_at_10,
+            'gold_per_min_at_10': gold_per_min_at_10
+        }
+        return stats_dict, self.game_duration
+
 #testing class
-obj = ConvertData([0,0])
+#obj = ConvertData([0,0])
