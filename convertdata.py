@@ -5,8 +5,18 @@ import json
 class ConvertData:
 
     def __init__(self, event_list):
+        #api response is diffrent on diffrents modes
+        #http://static.developer.riotgames.com/docs/lol/queues.json 
+        self.game_mode_list = (
+            700,
+            440,
+            430,
+            420,
+            400,
+        )
         self.event_list = event_list
         self.champion_played = ""
+        self.game_mode = 0
         #time in secs
         self.game_duration = 0
         with open('login_data.json') as f:
@@ -58,6 +68,8 @@ class ConvertData:
         if output["totalGames"] == 0:
             raise Exception("No game in match history for last 24h")
         self.champion_played = output['matches'][0]['champion']
+        self.game_mode = output['matches'][0]["queue"]
+        self.game_mode = self.game_mode in self.game_mode_list
         output = output['matches'][0]['gameId']
         return output
 
@@ -79,21 +91,28 @@ class ConvertData:
 
     def dump_data(self):
         game_data = self.match_data
+        print(game_data)
         win = False if game_data['stats']['win'] == 'false' else True
         #think about it
-        cs_per_min_at_10 = game_data['timeline']['creepsPerMinDeltas']['0-10']
-        cs_diff_at_10 = game_data['timeline']['csDiffPerMinDeltas']['0-10']
-        xp_per_min_at_10 = game_data['timeline']['xpPerMinDeltas']['0-10']
-        xp_diff_at_10 = game_data['timeline']['xpDiffPerMinDeltas']['0-10']
-        gold_per_min_at_10 = game_data['timeline']['goldPerMinDeltas']['0-10']
-    
-        stats_dict = {
-            'cs_per_min_at_10' : cs_per_min_at_10,
-            'cs_diff_at_10': cs_diff_at_10,
-            'xp_per_min_at_10': xp_per_min_at_10,
-            'xp_diff_at_10': xp_diff_at_10,
-            'gold_per_min_at_10': gold_per_min_at_10
-        }
+        if self.game_mode:
+            cs_per_min_at_10 = game_data['timeline']['creepsPerMinDeltas']['0-10']
+            cs_diff_at_10 = game_data['timeline']['csDiffPerMinDeltas']['0-10']
+            xp_per_min_at_10 = game_data['timeline']['xpPerMinDeltas']['0-10']
+            xp_diff_at_10 = game_data['timeline']['xpDiffPerMinDeltas']['0-10']
+            gold_per_min_at_10 = game_data['timeline']['goldPerMinDeltas']['0-10']
+        
+            stats_dict = {
+                'win': win,
+                'cs_per_min_at_10' : cs_per_min_at_10,
+                'cs_diff_at_10': cs_diff_at_10,
+                'xp_per_min_at_10': xp_per_min_at_10,
+                'xp_diff_at_10': xp_diff_at_10,
+                'gold_per_min_at_10': gold_per_min_at_10
+            }
+        else: 
+            stats_dict = {
+                'win': win,
+            }
         return stats_dict, self.game_duration
 
 #testing class
