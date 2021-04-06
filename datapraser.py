@@ -4,13 +4,14 @@ import seaborn as sns
 from win32api import GetSystemMetrics
 
 class DataProcces:
-    def __init__(self, input_data, game_api_data=[], game_duration=1080):
+    def __init__(self, input_data, game_api_data=[], game_duration):
         self.input_data = input_data
         self.game_duration = game_duration
         self.game_api_data = game_api_data
         self.screen_res = (GetSystemMetrics(0), GetSystemMetrics(1))
         self.heatmap_make()
-        self.apm_calculate()
+        self.apm_per_minute_array = self.apm_calculate()
+        self.avarage_apm = len(self.input_data) / (self.game_duration/60)
 
     def heatmap_make(self):
         timeline_list = []
@@ -35,15 +36,22 @@ class DataProcces:
         self.input_data = df
 
     def apm_calculate(self):
-        avarage_apm = len(self.input_data) / self.game_duration
+        apm_per_minute_array = []
+        actions = 0
         avarage_apm_per_min = 0
         max_time_value = self.input_data[-1:]['time'].values[0]
-        print(type(max_time_value))
         for index, row in self.input_data.iterrows():
+            actions += 1
             time_row = row['time']
-            index = time_row/max_time_value
+            index = int(time_row/60)
+            try: 
+                apm_per_minute_array[index] += 1
+            except IndexError:
+                apm_per_minute_array.append(1)
+        return apm_per_minute_array
 
 
 
     def data_frame_return(self):
-        return self.input_data
+        output = [self.input_data, self.apm_per_minute_array, self.avarage_apm]
+        return output
