@@ -4,16 +4,15 @@ import seaborn as sns
 from win32api import GetSystemMetrics
 
 class DataProcces:
-    def __init__(self, input_data, game_api_data=[], game_duration):
+    def __init__(self, input_data, game_api_data=[]):
         self.input_data = input_data
-        self.game_duration = game_duration
         self.game_api_data = game_api_data
         self.screen_res = (GetSystemMetrics(0), GetSystemMetrics(1))
-        self.heatmap_make()
+        self.make_first_data_frame()
         self.apm_per_minute_array = self.apm_calculate()
-        self.avarage_apm = len(self.input_data) / (self.game_duration/60)
+        self.avarage_apm = len(self.input_data) / (self.game_api_data['game_duration']/60)
 
-    def heatmap_make(self):
+    def make_first_data_frame(self):
         timeline_list = []
         button_list = []
         ox_list = []
@@ -50,8 +49,14 @@ class DataProcces:
                 apm_per_minute_array.append(1)
         return apm_per_minute_array
 
+    def calculate_buttons(self):
+        pass
 
-
+    def make_final_data_frame(self):
+        data = {
+            
+        }
+        result = pd.concat([df1, df3], axis=1, join='inner')
     def data_frame_return(self):
         output = [self.input_data, self.apm_per_minute_array, self.avarage_apm]
         return output
