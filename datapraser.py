@@ -33,7 +33,8 @@ class DataProcces:
         }
         df = pd.DataFrame(data=data)
         self.input_data = df
-
+    
+    #return array with apm over time (fromat: [0-1])
     def apm_calculate(self):
         apm_per_minute_array = []
         actions = 0
