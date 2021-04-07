@@ -41,7 +41,7 @@ class ConvertData:
     def _one_day_ago_in_epoch(self):
         now = time.time()
         #days before now
-        secs_in_day = 5*24*60*60
+        secs_in_day = 3*24*60*60
         epoch_time = now - secs_in_day
         #riot api needs time in milliseconds
         epoch_time *= 1000
@@ -61,7 +61,7 @@ class ConvertData:
         MATCH_URL = f"/lol/match/v4/matchlists/by-account/{summoner_id}?beginTime={self._one_day_ago_in_epoch()}"
         url = self.API_URL + MATCH_URL
         #waiting for riot servers to sync match_data
-        #time.sleep(120)
+        time.sleep(120)
         r = requests.get(url, headers=self.headers)
         output = r.json()
         #validate
@@ -89,11 +89,10 @@ class ConvertData:
 
         return output
 
-    def dump_data(self):
+
+    def make_dictionary_from_api_response(self):
         game_data = self.match_data
-        print(game_data)
         win = False if game_data['stats']['win'] == 'false' else True
-        #think about it
         if self.game_mode:
             cs_per_min_at_10 = game_data['timeline']['creepsPerMinDeltas']['0-10']
             cs_diff_at_10 = game_data['timeline']['csDiffPerMinDeltas']['0-10']
@@ -103,6 +102,7 @@ class ConvertData:
         
             stats_dict = {
                 'win': win,
+                'game_duration': self.game_duration
                 'cs_per_min_at_10' : cs_per_min_at_10,
                 'cs_diff_at_10': cs_diff_at_10,
                 'xp_per_min_at_10': xp_per_min_at_10,
@@ -112,8 +112,6 @@ class ConvertData:
         else: 
             stats_dict = {
                 'win': win,
+                'game_duration': self.game_duration
             }
-        return stats_dict, self.game_duration
-
-#testing class
-#obj = ConvertData([0,0])
+        return stats_dict
